@@ -20,7 +20,7 @@ public:
     void draw() const;
     int getItemCount() const;
 private:
-    std::vector<Item> items;
-    const std::chrono::seconds itemLifetime{20};
+    std::vector<Item> items; // 아이템 좌표,종류, 시간 관리
+    const std::chrono::seconds itemLifetime{20}; // 아이템 유지 시간
 };
 #endif

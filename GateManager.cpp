@@ -1,10 +1,9 @@
 #include "GateManager.hpp"
-#include "Map.hpp" // Map 클래스의 전체 정의를 포함
+#include "Map.hpp"
 #include <ncurses.h>
 #include <cstdlib>
 
 GateManager::GateManager() : areGatesActive(false) {
-    // 첫 게이트는 게임 시작 10초 후에 생성됩니다.
     nextActionTime = std::chrono::steady_clock::now() + std::chrono::seconds(10);
 }
 
@@ -13,12 +12,12 @@ void GateManager::update(Map& map) {
 
     if (now >= nextActionTime) {
         if (areGatesActive) {
-            // 현재 게이트가 활성화 상태 -> 비활성화(소멸)할 시간
+            // 현재 게이트가 활성화 상태 -> 비활성화
             despawnGates(map);
             areGatesActive = false;
             nextActionTime = now + gateCooldown; // 다음 생성 시간 설정
         } else {
-            // 현재 게이트가 비활성화 상태 -> 활성화(생성)할 시간
+            // 현재 게이트가 비활성화 상태 -> 활성화
             spawnGates(map);
             areGatesActive = true;
             nextActionTime = now + gateLifetime; // 다음 소멸 시간 설정
@@ -26,10 +25,10 @@ void GateManager::update(Map& map) {
     }
 }
 
-void GateManager::draw(const Map& map) const {
+void GateManager::draw(const Map& map) const { // 게이트 출력
     if (!areGatesActive) return;
 
-    attron(COLOR_PAIR(8)); // 게이트 색상 (나중에 Game::initColors에서 정의)
+    attron(COLOR_PAIR(8));
     for (const auto& gatePos : gates) {
         mvprintw(gatePos.y, gatePos.x, "G");
     }
@@ -61,9 +60,9 @@ void GateManager::spawnGates(Map& map) {
     gates.clear();
     std::vector<Point> wallPositions = map.getWallPositions();
 
-    if (wallPositions.size() < 2) return; // 벽이 2개 미만이면 게이트 생성 불가
+    if (wallPositions.size() < 2) return;
 
-    // 두 개의 서로 다른 랜덤 인덱스를 뽑습니다.
+    // 두 개의 서로 다른 랜덤 인덱스를 뽑기
     int index1 = rand() % wallPositions.size();
     int index2;
     do {
@@ -73,10 +72,11 @@ void GateManager::spawnGates(Map& map) {
     Point gate1Pos = wallPositions[index1];
     Point gate2Pos = wallPositions[index2];
 
+    // 게이트 위치 저장
     gates.push_back(gate1Pos);
     gates.push_back(gate2Pos);
 
-    // Map 객체에 게이트 위치를 알려주어 맵 데이터를 수정하게 합니다.
+    // Map 객체에 게이트 위치를 알려주어 게이트 생성
     map.placeGate(gate1Pos);
     map.placeGate(gate2Pos);
 }

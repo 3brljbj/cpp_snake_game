@@ -2,7 +2,7 @@
 #include <ncurses.h>
 #include <cstdlib>
 
-Map::Map(int termHeight, int termWidth) {
+Map::Map(int termHeight, int termWidth) { // 맵 최초 생성
     mapHeight = termHeight;
     int availableWidthForMap = termWidth - 25;
     mapWidth = availableWidthForMap;
@@ -31,17 +31,14 @@ Map::Map(int termHeight, int termWidth) {
 
 Map::~Map() {}
 
-// draw 함수에 case 3: (Gate) 로직을 추가합니다.
-void Map::draw() const {
+void Map::draw() const { // 맵 출력
     for (int y = 0; y < mapHeight; ++y) {
         for (int x = 0; x < mapWidth; ++x) {
             int type = mapData[y][x];
-            // 게이트는 GateManager가 별도로 그리므로, 여기서는 그냥 빈 공간으로 둡니다.
-            // 만약 게이트의 배경색을 다르게 하고 싶다면 여기서 처리합니다.
-            if (type == 3) { // Gate 위치
-                 attron(COLOR_PAIR(1)); // 임시로 벽과 같은 배경색 사용
+            if (type == 3) {
+                 attron(COLOR_PAIR(8));
                  mvprintw(y, x, " ");
-                 attroff(COLOR_PAIR(1));
+                 attroff(COLOR_PAIR(8));
             } else {
                 attron(COLOR_PAIR(type == 1 ? 1 : (type == 2 ? 2 : 7)));
                 mvprintw(y, x, " ");
@@ -51,23 +48,23 @@ void Map::draw() const {
     }
 }
 
-// isWall 함수에서 게이트는 벽이 아니라고 판단하도록 수정합니다.
-bool Map::isWall(const Point& p) const {
+bool Map::isWall(const Point& p) const { // 벽과의 충돌 판정 등을 위해 해당 좌표가 벽인지 반환
     if (p.y < 0 || p.y >= mapHeight || p.x < 0 || p.x >= mapWidth) return true;
-    // 타입이 1 또는 2인 경우에만 벽으로 간주합니다.
     return mapData[p.y][p.x] == 1 || mapData[p.y][p.x] == 2;
 }
+
 Point Map::getCenter() const { return center; }
-Point Map::getRandomEmptyPosition() const {
+
+Point Map::getRandomEmptyPosition() const { // 아이템 등의 요소 생성을 위해 빈 공간 반환
     Point p;
     do { p = {rand() % mapHeight, rand() % mapWidth}; } while (mapData[p.y][p.x] != 0);
     return p;
 }
-std::vector<Point> Map::getWallPositions() const {
+
+std::vector<Point> Map::getWallPositions() const { // 게이트 생성 가능 위치(모든 벽의 좌표)를 계산하여 반환
     std::vector<Point> positions;
     for (int y = 0; y < mapHeight; ++y) {
         for (int x = 0; x < mapWidth; ++x) {
-            // 타입이 1인 'Wall' 위에서만 게이트가 생성됩니다.
             if (mapData[y][x] == 1) {
                 positions.push_back({y, x});
             }
@@ -76,16 +73,14 @@ std::vector<Point> Map::getWallPositions() const {
     return positions;
 }
 
-void Map::placeGate(Point p) {
+void Map::placeGate(Point p) { // 해당 좌표를 gate로 변경
     if (p.y >= 0 && p.y < mapHeight && p.x >= 0 && p.x < mapWidth) {
-        // 해당 위치의 맵 타입을 3(Gate)으로 변경합니다.
         mapData[p.y][p.x] = 3;
     }
 }
 
-void Map::removeGate(Point p) {
+void Map::removeGate(Point p) { // 해당 좌표를 게이트에서 wall로 변경
     if (p.y >= 0 && p.y < mapHeight && p.x >= 0 && p.x < mapWidth) {
-        // 게이트가 있던 자리를 다시 1(Wall)으로 되돌립니다.
         mapData[p.y][p.x] = 1;
     }
 }

@@ -11,6 +11,7 @@ public:
     void move();
     bool setDirection(Direction newDirection);
     void grow();
+    void prependHead(Point newHeadPos);
     void shrink();
     bool checkSelfCollision() const;
     bool isOccupying(Point p) const;
@@ -20,11 +21,8 @@ public:
     void setBody(const std::vector<Point>& newBody);
     Direction getDirection() const;
 
-    void shrinkTail();
-    void prependHead(Point newHeadPos);
-
 private:
-    std::vector<Point> body;
-    Direction currentDirection;
+    std::vector<Point> body; // 뱀의 좌표 저장
+    Direction currentDirection; // 뱀의 방향 저장
 };
 #endif

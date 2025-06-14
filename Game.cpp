@@ -21,7 +21,7 @@ Game::Game(int termHeight, int termWidth)
 Game::~Game() {}
 
 void Game::run() {
-    while (currentGameState != GameState::GAME_OVER) {
+    while (currentGameState != GameState::GAME_OVER) { // 게임 종료시 까지 입력받기, 업데이트, 화면출력을 반복
         processInput();
         auto now = std::chrono::steady_clock::now();
         if (now >= nextTick) {
@@ -32,7 +32,7 @@ void Game::run() {
     }
 }
 
-void Game::processInput() {
+void Game::processInput() { // 입력을 받아 뱀의 방향 변경. 진행 반대방향 입력시, q 입력 시 게임오버 
     int key = getch();
     bool directionChangedSuccessfully = true;
     switch (key) {
@@ -45,8 +45,7 @@ void Game::processInput() {
     if (!directionChangedSuccessfully) currentGameState = GameState::GAME_OVER;
 }
 
-// 메인 updateState 함수: 상태에 따라 다른 함수를 호출
-void Game::updateState() {
+void Game::updateState() { // 메인 updateState 함수: 상태에 따라 다른 함수를 호출
     switch (currentGameState) {
         case GameState::PLAYING:
             updateState_Playing();
@@ -59,14 +58,13 @@ void Game::updateState() {
     }
 }
 
-// 1. 평상시(PLAYING) 상태의 로직
-void Game::updateState_Playing() {
+void Game::updateState_Playing() { // 1. 평상시(PLAYING) 로직
     gateManager.update(map);
     snake.move();
     Point head = snake.getHeadPosition();
 
-    // 게이트 진입 감지 및 상태 전환
-    if (gateManager.isGate(head)) {
+    
+    if (gateManager.isGate(head)) { // 게이트 진입 감지 및 상태 전환
         gateCount++;
         currentGameState = GameState::PASSING_THROUGH_GATE;
         
@@ -81,9 +79,10 @@ void Game::updateState_Playing() {
         return;
     }
 
-    // 충돌 및 아이템, 미션 로직
+    // 충돌
     if (map.isWall(head) || snake.checkSelfCollision()) { currentGameState = GameState::GAME_OVER; return; }
 
+    // 아이템
     auto now = std::chrono::steady_clock::now();
     if (now >= nextItemSpawn && itemManager.getItemCount() < 3) {
         Point p;
@@ -101,14 +100,16 @@ void Game::updateState_Playing() {
         snake.shrink();
         poisonCount++;
     }
+
     if (snake.getLength() <= 3) { currentGameState = GameState::GAME_OVER; return; }
+
+    // 보드 업데이트
     uiManager.update(snake.getLength(), maxLength, growthCount, poisonCount, gateCount);
     if (uiManager.areAllMissionsComplete()) { currentGameState = GameState::GAME_OVER; return; }
 }
 
-// 2. 게이트 통과 중(PASSING_THROUGH_GATE) 상태의 로직
-void Game::updateState_PassingThroughGate() {
-    // 꼬리를 한 칸 제거 (진입 게이트에서 사라짐)
+
+void Game::updateState_PassingThroughGate() { // 2. 게이트 통과 중(PASSING_THROUGH_GATE) 상태의 로직
     snake.shrink();
 
     // 새로운 머리가 나타날 위치 계산
@@ -117,7 +118,7 @@ void Game::updateState_PassingThroughGate() {
         // 첫 머리는 계산된 진출 위치에 생성
         newHeadPos = exitGatePos;
     } else {
-        // 다음 머리부터는 이전 머리를 기준으로 진출 방향으로 생성
+        // 다음부터는 이전 머리를 기준으로 진출 방향으로 생성
         newHeadPos = snake.getHeadPosition();
         switch (exitDirection) {
             case Direction::UP: newHeadPos.y--; break;
@@ -137,8 +138,7 @@ void Game::updateState_PassingThroughGate() {
     }
 }
 
-// 화면을 그리는 render 함수
-void Game::render() {
+void Game::render() {// 화면 출력
     clear();
     map.draw();
     gateManager.draw(map);
@@ -148,8 +148,7 @@ void Game::render() {
     refresh();
 }
 
-// 색상을 초기화하는 initColors 함수
-void Game::initColors() {
+void Game::initColors() { // 각 요소의 색상을 초기화
     init_pair(1, COLOR_BLACK, COLOR_CYAN);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
     init_pair(3, COLOR_BLACK, COLOR_YELLOW);

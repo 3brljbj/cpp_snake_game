@@ -8,13 +8,13 @@ int main() {
     getmaxyx(stdscr, termHeight, termWidth);
     endwin();
 
-    if (termHeight < 21 || termWidth < 67) {
+    if (termHeight < 21 || termWidth < 67) { // 터미널이 너무 작을 시 실행 불가
         std::cout << "Terminal window is too small." << std::endl;
         std::cout << "Please resize it to be at least 67x21 and run again." << std::endl;
         return 0;
     }
 
-    initscr();
+    initscr(); // ncurses 초기화
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);

@@ -22,7 +22,7 @@ private:
     int boardWidth, BoardHeight;
     int score_currentLength, score_maxLength;
     int score_growthItems, score_poisonItems, score_gateUsage;
-    std::vector<Mission> missions;
+    std::vector<Mission> missions; // 미션의 이름, 달성 여부 등을 저장
     void drawScoreBoard() const;
     void drawMissionBoard() const;
     void checkMissions();
